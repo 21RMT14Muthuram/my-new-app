@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -54,6 +55,8 @@ func LoginHandler(c *gin.Context) {
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 	}
+	fmt.Print("=====", models.UserStore)
+	fmt.Print("=====", claims)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
