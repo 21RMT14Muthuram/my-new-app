@@ -10,7 +10,7 @@ var DB *sql.DB
 
 func Connect() error {
     var err error
-    DB, err = sql.Open("sqlite", "./mydb.db")
+    DB, err = sql.Open("sqlite", "../../mydb.db")
     if err != nil {
         return err
     }

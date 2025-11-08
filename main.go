@@ -15,13 +15,13 @@ func main() {
     }
     defer Config.DB.Close()
     
-	
+
     r := gin.Default()
 
     // Public routes
+	r.GET("/get-users", controller.GetUsers)
     r.POST("/signup", controller.SignUpHandler)
-    // r.POST("/login", controller.LoginHandler)
-
+    r.POST("/login", controller.LoginHandler)
     fmt.Println("Server starting on :9000")
     r.Run(":9000")
 }
