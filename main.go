@@ -22,6 +22,7 @@ func main() {
 	r.GET("/get-users", controller.GetUsers)
     r.POST("/signup", controller.SignUpHandler)
     r.POST("/login", controller.LoginHandler)
+	r.DELETE("/delete/:id", controller.DeleteUser)
     fmt.Println("Server starting on :9000")
     r.Run(":9000")
 }

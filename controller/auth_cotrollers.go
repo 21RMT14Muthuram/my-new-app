@@ -58,8 +58,8 @@ func SignUpHandler(c *gin.Context){
 	}
 
 	// Validate input
-    if newUser.Usermail == "" || newUser.Password == "" {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Email and password are required"})
+    if !IsValidEmail(newUser.Usermail) && !IsValidPassword(newUser.Password) {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Mismatch you Email or Password"})
         return
     }
 
@@ -128,3 +128,18 @@ func LoginHandler(c *gin.Context){
 
 }
 
+func DeleteUser(c *gin.Context){
+	id := c.Param("id")
+	result, err := Config.DB.Exec(`DELETE FROM users WHERE id = ?`, id)
+
+	if err != nil{
+		c.JSON(http.StatusInternalServerError, gin.H{"message":"DataBase Error"})
+		return
+	}
+	row_Affected, _ := result.RowsAffected()
+	if row_Affected == 0{
+		c.JSON(http.StatusNotFound, gin.H{"message":"User not Found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully !"})
+}

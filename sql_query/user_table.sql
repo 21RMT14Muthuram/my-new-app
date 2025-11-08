@@ -18,3 +18,9 @@ CREATE TABLE users (
 );
 
 SELECT * FROM sqlite_master WHERE type='table' AND name='users';
+
+-- Add new columns to your existing users table
+ALTER TABLE users 
+ADD COLUMN otp_code VARCHAR(10),
+ADD COLUMN otp_expires_at TIMESTAMP,
+ADD COLUMN verified_at TIMESTAMP NULL;
