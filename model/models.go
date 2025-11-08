@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
 
 type User struct {
     ID           int        `json:"id"`
@@ -13,3 +17,10 @@ type User struct {
     CreatedAt    time.Time  `json:"created_at"`
     UpdatedAt    time.Time  `json:"updated_at"`
 }
+
+type Claims struct {
+	Usermail string `json:"usermail"`
+	jwt.RegisteredClaims
+}
+
+var JWTKey = []byte("my_secret_key")

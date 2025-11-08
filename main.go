@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/21RMT14Muthuram/my-new-app/controller"
 	Config "github.com/21RMT14Muthuram/my-new-app/database"
+	"github.com/21RMT14Muthuram/my-new-app/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,6 +35,14 @@ func main() {
 	r.POST("/verify-otp", controller.VerifyOTPHandler)     // New
 	r.POST("/resend-otp", controller.ResendOTPHandler)     // New
 	r.DELETE("/delete/:id", controller.DeleteUser)
+
+
+	auth := r.Group("/auth")
+	auth.Use(middleware.AuthMiddleware())
+		
+	auth.GET("/content", controller.Content)
+
+
 
 	fmt.Println("Server starting on :9000")
 	
