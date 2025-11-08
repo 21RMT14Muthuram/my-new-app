@@ -16,7 +16,7 @@ func NewPrint(){
 
 func AddSingleUser() {
     user := models.User{
-        Username: "Muthuram",
+        Usermail: "Muthuram",
         Password: "12345",
     }
 

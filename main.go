@@ -1,21 +1,27 @@
 package main
 
 import (
-
-	"github.com/21RMT14Muthuram/my-new-app/controller"
-	"github.com/gin-gonic/gin"
+    "fmt"
+    "github.com/21RMT14Muthuram/my-new-app/controller"
+    "github.com/21RMT14Muthuram/my-new-app/database"
+    "github.com/gin-gonic/gin"
 )
 
-func main(){
-	// fmt.Print("Hello, World!")
-	// controller.NewPrint()
-	// controller.AddSingleUser()
-	r := gin.Default()
+func main() {
+    // Initialize database connection
+    if err := Config.Connect(); err != nil {
+        fmt.Printf("Failed to connect to database: %v\n", err)
+        return
+    }
+    defer Config.DB.Close()
+    
+	
+    r := gin.Default()
 
-	//public routes
-	r.POST("./signup", controller.SignUpHandler)
-	r.POST("/login", controller.LoginHandler)
+    // Public routes
+    r.POST("/signup", controller.SignUpHandler)
+    // r.POST("/login", controller.LoginHandler)
 
-
-	r.Run(":8000")
+    fmt.Println("Server starting on :9000")
+    r.Run(":9000")
 }
