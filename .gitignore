@@ -1,0 +1,9 @@
+# Environment & secrets
+.env
+*.json
+OAuth/
+*.db
+
+# Build outputs
+bin/
+*.exe
