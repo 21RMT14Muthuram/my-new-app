@@ -344,6 +344,10 @@ func LoginHandler(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 			return
 		}
+		if err := Greeting(lguser.Usermail, "./templates/greeting.html"); err != nil {
+			fmt.Printf("Failed to send greeting email: %v\n", err)
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Login Successfully",
 			"token": tokenString,
