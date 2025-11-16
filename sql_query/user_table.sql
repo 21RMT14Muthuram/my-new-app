@@ -1,4 +1,6 @@
 
+-- =========================       Users Table        =========================
+
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(50) ,
@@ -24,3 +26,6 @@ ALTER TABLE users
 ADD COLUMN otp_code VARCHAR(10),
 ADD COLUMN otp_expires_at TIMESTAMP,
 ADD COLUMN verified_at TIMESTAMP NULL;
+
+
+-- =============================       
