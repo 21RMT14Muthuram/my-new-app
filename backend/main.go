@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/21RMT14Muthuram/my-new-app/controller"
 	Config "github.com/21RMT14Muthuram/my-new-app/database"
-	"github.com/21RMT14Muthuram/my-new-app/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
+	"time"
 )
 
 func main() {
@@ -25,8 +25,15 @@ func main() {
 
 	// Initialize email configuration
 	controller.InitEmailConfig()
-
 	r := gin.Default()
+r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Public routes
 	r.GET("/get-users", controller.GetUsers)
@@ -35,14 +42,6 @@ func main() {
 	r.POST("/verify-otp", controller.VerifyOTPHandler)     // New
 	r.POST("/resend-otp", controller.ResendOTPHandler)     // New
 	r.DELETE("/delete/:id", controller.DeleteUser)
-
-
-	auth := r.Group("/auth")
-	auth.Use(middleware.AuthMiddleware())
-		
-	auth.GET("/content", controller.Content)
-
-
 
 	fmt.Println("Server starting on :9000")
 	

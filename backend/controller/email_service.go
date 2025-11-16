@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
 	"net/smtp"
 	"os"
 
@@ -42,44 +40,6 @@ func InitEmailConfig() {
 	// fmt.Print("Env List", EmailCfg)
 }
 
-func Greeting(toEmail, templatePath string) error {
-	var body bytes.Buffer
-
-	 fmt.Printf("Attempting to send email to: %s\n", toEmail)
-	
-	// Parse template and handle error
-	t, err := template.ParseFiles(templatePath)
-	if err != nil {
-		fmt.Printf("failed to parse template")
-		return err
-	}
-	
-	// Execute template and handle error
-	if err := t.Execute(&body, struct{ Name string }{Name: "John"}); err != nil {
-		return fmt.Errorf("failed to execute template: %w", err)
-	}
-	
-	// Email authentication
-	auth := smtp.PlainAuth("", EmailCfg.SMTPUsername, EmailCfg.SMTPPassword, EmailCfg.SMTPHost)
-	
-	// Proper email headers
-	headers := "MIME-Version: 1.0\r\n" +
-		"Content-Type: text/html; charset=\"UTF-8\"\r\n" +
-		"From: " + EmailCfg.FromEmail + "\r\n" +
-		"To: " + toEmail + "\r\n" +
-		"Subject: Greeting Sir\r\n"
-	
-	message := headers + "\r\n" + body.String()
-	
-	// Send email and return the error directly
-	return smtp.SendMail(
-		EmailCfg.SMTPHost+":"+EmailCfg.SMTPPort,
-		auth,
-		EmailCfg.FromEmail,
-		[]string{toEmail},
-		[]byte(message),
-	)
-}
 
 // SendOTPEmail sends OTP to user's email
 func SendOTPEmail(toEmail, otpCode string) error {

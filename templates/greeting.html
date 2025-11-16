@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greeting Card</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card h1 {
+            color: #e91e63;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card .signature {
+            font-style: italic;
+            color: #777;
+            margin-top: 20px;
+        }
+
+        /* Optional: Add a subtle background pattern */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIyIiBmaWxsPSIjZjhlY2VkIi8+PC9zdmc+');
+            opacity: 0.2;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Happy Birthday!</h1>
+        <p>Wishing you a day filled with joy, laughter, and everything you wish for. May your year ahead be as amazing as you are!</p>
+        <p class="signature">Warmly, {{ .Name }}</p>
+    </div>
+</body>
+</html>

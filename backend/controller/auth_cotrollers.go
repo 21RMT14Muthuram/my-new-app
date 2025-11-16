@@ -9,10 +9,11 @@ import (
 	Config "github.com/21RMT14Muthuram/my-new-app/database"
 	models "github.com/21RMT14Muthuram/my-new-app/model"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	// "github.com/golang-jwt/jwt/v5"
 )
 
+
+var jwtKey = []byte("my-secret-key")
 
 
 func GetUsers(c *gin.Context) {
@@ -328,31 +329,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	if CheckHashPass(lguser.Password, checkpass) {
-		// c.JSON(http.StatusOK, gin.H{"message": "Login Successfully"})
-
-		expirationTime := time.Now().Add(2 * time.Hour)
-		claims := &models.Claims{
-			Usermail: lguser.Usermail,
-			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(expirationTime),
-			},
-		}
-
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString(models.JWTKey)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
-			return
-		}
-		if err := Greeting(lguser.Usermail, "./templates/greeting.html"); err != nil {
-			fmt.Printf("Failed to send greeting email: %v\n", err)
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Login Successfully",
-			"token": tokenString,
-		})
-		
+		c.JSON(http.StatusOK, gin.H{"message": "Login Successfully"})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
 	}
