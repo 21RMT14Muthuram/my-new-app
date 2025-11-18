@@ -13,17 +13,15 @@ import (
 
 func main() {
 	// Initialize database connection
-	if err := Config.Connect(); err != nil {
+	if err := Config.InitDB(); err != nil { // Changed from Connect() to InitDB()
 		fmt.Printf("Failed to connect to database: %v\n", err)
 		return
 	}
-	defer Config.DB.Close()
+	defer Config.CloseDB() // Changed from DB.Close() to CloseDB()
 
-	// Run migrations
-	if err := Config.Migrate(); err != nil {
-		fmt.Printf("Migration failed: %v\n", err)
-		return
-	}
+	// Run migrations (you'll need to update your migration function too)
+
+	
 
 	// Initialize email configuration
 	controller.InitEmailConfig()
@@ -43,17 +41,14 @@ func main() {
 	r.GET("/get-users", controller.GetUsers)
 	r.POST("/signup", controller.SignUpHandler)
 	r.POST("/login", controller.LoginHandler)
-	r.POST("/verify-otp", controller.VerifyOTPHandler)     // New
-	r.POST("/resend-otp", controller.ResendOTPHandler)     // New
+	r.POST("/verify-otp", controller.VerifyOTPHandler)
+	r.POST("/resend-otp", controller.ResendOTPHandler)
 	r.DELETE("/delete/:id", controller.DeleteUser)
-
 
 	auth := r.Group("/auth")
 	auth.Use(middleware.AuthMiddleware())
 		
 	auth.GET("/content", controller.Content)
-
-
 
 	fmt.Println("Server starting on :9000")
 	
