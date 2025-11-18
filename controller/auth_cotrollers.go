@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -9,22 +10,21 @@ import (
 	Config "github.com/21RMT14Muthuram/my-new-app/database"
 	models "github.com/21RMT14Muthuram/my-new-app/model"
 	"github.com/gin-gonic/gin"
-	// "github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 )
 
-
-var jwtKey = []byte("my-secret-key")
 
 
 func GetUsers(c *gin.Context) {
     var userList []models.User
 
 
-    rows, err := Config.DB.Query(`
+    rows, err := Config.DB.Query(context.Background(), `
         SELECT id, email, password_hash, is_verified, 
                otp_code, otp_expires_at, verified_at, 
                created_at, updated_at 
-        FROM users
+        FROM usermgmt.users
     `)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
@@ -82,8 +82,8 @@ func VerifyOTPHandler(c *gin.Context) {
 	var userID int
 	var isVerified bool
 
-	err := Config.DB.QueryRow(
-		`SELECT id, otp_code, otp_expires_at, is_verified FROM users WHERE email = ?`,
+	err := Config.DB.QueryRow(context.Background(),
+		`SELECT id, otp_code, otp_expires_at, is_verified FROM usermgmt.users WHERE email = $1`,
 		verificationRequest.Email,
 	).Scan(&userID, &storedOTP, &otpExpiresAt, &isVerified)
 
@@ -111,8 +111,8 @@ func VerifyOTPHandler(c *gin.Context) {
 
 	// Mark user as verified and clear OTP data
 	now := time.Now()
-	_, err = Config.DB.Exec(
-		`UPDATE users SET is_verified = TRUE, verified_at = ?, otp_code = NULL, otp_expires_at = NULL WHERE id = ?`,
+	_, err = Config.DB.Exec(context.Background(),
+		`UPDATE usermgmt.users SET is_verified = TRUE, verified_at = $1, otp_code = NULL, otp_expires_at = NULL WHERE id = $2`,
 		now, userID,
 	)
 
@@ -139,8 +139,8 @@ func ResendOTPHandler(c *gin.Context) {
 	// Check if user exists and is not verified
 	var userID int
 	var isVerified bool
-	err := Config.DB.QueryRow(
-		`SELECT id, is_verified FROM users WHERE email = ?`,
+	err := Config.DB.QueryRow(context.Background(),
+		`SELECT id, is_verified FROM usermgmt.users WHERE email = $1`,
 		resendRequest.Email,
 	).Scan(&userID, &isVerified)
 
@@ -166,8 +166,8 @@ func ResendOTPHandler(c *gin.Context) {
 	}
 
 	// Update OTP in database
-	_, err = Config.DB.Exec(
-		`UPDATE users SET otp_code = ?, otp_expires_at = ? WHERE id = ?`,
+	_, err = Config.DB.Exec(context.Background(),
+		`UPDATE usermgmt.users SET otp_code = $1, otp_expires_at = $2 WHERE id = $3`,
 		otp, expiry, userID,
 	)
 
@@ -217,8 +217,8 @@ func SignUpHandler(c *gin.Context) {
 	// Check if email already exists (including verified users)
 	var existingID int
 	var isVerified bool
-	err := Config.DB.QueryRow(
-		`SELECT id, is_verified FROM users WHERE email = ?`, 
+	err := Config.DB.QueryRow(context.Background(),
+		`SELECT id, is_verified FROM usermgmt.users WHERE email = $1`, 
 		newUser.Usermail,
 	).Scan(&existingID, &isVerified)
 
@@ -230,7 +230,7 @@ func SignUpHandler(c *gin.Context) {
 			c.JSON(http.StatusConflict, gin.H{"message": "Email exists but not verified. Please verify your account."})
 		}
 		return
-	} else if err != sql.ErrNoRows {
+	} else if err != pgx.ErrNoRows {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Database error"})
 		fmt.Printf("Database error: %v\n", err)
 		return
@@ -253,9 +253,9 @@ func SignUpHandler(c *gin.Context) {
 	}
 
 	// Insert user with OTP data
-	_, err = Config.DB.Exec(
-		`INSERT INTO users (email, password_hash, is_verified, otp_code, otp_expires_at) 
-		 VALUES (?, ?, ?, ?, ?)`,
+	_, err = Config.DB.Exec(context.Background(),
+		`INSERT INTO usermgmt.users (email, password_hash, is_verified, otp_code, otp_expires_at) 
+		 VALUES ($1, $2, $3, $4, $5)`,
 		newUser.Usermail, hashedPassword, false, otp, expiry,
 	)
 
@@ -304,8 +304,8 @@ func LoginHandler(c *gin.Context) {
 
 	var checkpass string
 	var isVerified bool
-	err := Config.DB.QueryRow(
-		`SELECT password_hash, is_verified FROM users WHERE email = ?`, 
+	err := Config.DB.QueryRow(context.Background(),
+		`SELECT password_hash, is_verified FROM usermgmt.users WHERE email = $1`, 
 		lguser.Usermail,
 	).Scan(&checkpass, &isVerified)
 
@@ -329,7 +329,31 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	if CheckHashPass(lguser.Password, checkpass) {
-		c.JSON(http.StatusOK, gin.H{"message": "Login Successfully"})
+		// c.JSON(http.StatusOK, gin.H{"message": "Login Successfully"})
+
+		expirationTime := time.Now().Add(2 * time.Hour)
+		claims := &models.Claims{
+			Usermail: lguser.Usermail,
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(expirationTime),
+			},
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, err := token.SignedString(models.JWTKey)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
+			return
+		}
+		if err := Greeting(lguser.Usermail, "./templates/greeting.html"); err != nil {
+			fmt.Printf("Failed to send greeting email: %v\n", err)
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Login Successfully",
+			"token": tokenString,
+		})
+		
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials"})
 	}
@@ -337,13 +361,13 @@ func LoginHandler(c *gin.Context) {
 
 func DeleteUser(c *gin.Context){
 	id := c.Param("id")
-	result, err := Config.DB.Exec(`DELETE FROM users WHERE id = ?`, id)
+	result, err := Config.DB.Exec(context.Background(), `DELETE FROM usermgmt.users WHERE id = $1`, id)
 
 	if err != nil{
 		c.JSON(http.StatusInternalServerError, gin.H{"message":"DataBase Error"})
 		return
 	}
-	row_Affected, _ := result.RowsAffected()
+	row_Affected := result.RowsAffected()
 	if row_Affected == 0{
 		c.JSON(http.StatusNotFound, gin.H{"message":"User not Found"})
 		return
