@@ -64,7 +64,6 @@ func InitDB() error {
 	poolConfig.MaxConnLifetime = time.Hour
 	poolConfig.MaxConnIdleTime = 30 * time.Minute
 
-	// Create connection pool
 	DB, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {
 		return fmt.Errorf("\n error creating connection pool: %w", err)

@@ -44,6 +44,11 @@ func main() {
 	r.POST("/verify-otp", controller.VerifyOTPHandler)
 	r.POST("/resend-otp", controller.ResendOTPHandler)
 	r.DELETE("/delete/:id", controller.DeleteUser)
+	
+	// Google OAuth
+	r.GET("/login/google", controller.HandleGoogleLogin)
+	r.GET("/auth/google/callback", controller.HandleGoogleCallback)
+
 
 	auth := r.Group("/auth")
 	auth.Use(middleware.AuthMiddleware())
