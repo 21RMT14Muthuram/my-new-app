@@ -49,10 +49,10 @@ func InitDB() error {
 					config.SSLMode,
 				)
 	}
-
+	fmt.Print("value of env files", connStr)
 	log.Printf("Connecting to database: %s@%s:%s/%s", 
 		config.User, config.Host, config.Port, config.Database)
-	fmt.Print("--------",connStr)
+		
 	poolConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
 		return fmt.Errorf("\n error parsing connection string: %w", err)

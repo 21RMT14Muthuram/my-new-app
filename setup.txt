@@ -1,0 +1,73 @@
+#install nginx server
+
+sudo apt install nginx
+sudo systemctl status nginx
+sudo systemctl enable nginx
+sudo nginx -t
+
+
+
+#install postgres
+
+ sudo apt install postgresql postgresql-contrib -y
+ sudo systemctl status postgresql
+ sudo -u postgres createuser --interactive  (set user, role)
+
+#install Adminer
+
+ sudo apt install php php-fpm php-pgsql -y
+ sudo mkdir -p /var/www/adminer
+ sudo mkdir -p /var/www/adminer
+ cd /var/www/adminer
+ sudo wget https://www.adminer.org/latest.php -O index.php
+ sudo chown -R $USER:$USER /var/www/adminer
+ sudo chmod -R 755 /var/www/adminer
+ sudo nano /etc/nginx/sites-available/adminer.conf
+paste this 
+#================
+server {
+    listen 80;
+    server_name _;
+
+    root /var/www/adminer;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|html)$ {
+        expires max;
+        log_not_found off;
+    }
+}
+#==============
+
+
+#restart
+sudo systemctl restart php8.3-fpm
+sudo systemctl restart nginx
+ls -l /var/www/adminer/   # you will must saw index.php
+sudo wget https://www.adminer.org/latest.php -O /var/www/adminer/index.php
+sudo chmod 644 /var/www/adminer/index.php
+
+
+#create user in sql
+
+sudo -u postgres psql
+ALTER USER user_name WITH PASSWORD 'password';
+
+
+
+#if you want customiz theme
+/var/www/adminer$ sudo rm /var/www/adminer/adminer.css
+sudo wget https://raw.githubusercontent.com/vrana/adminer/master/designs/flat/adminer.css
+
+#Port
+
+sudo ss -tulnp | grep 5432
