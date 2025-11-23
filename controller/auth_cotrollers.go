@@ -345,10 +345,17 @@ func LoginHandler(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 			return
 		}
+
+		if _, err := Config.DB.Exec(context.Background(), `UPDATE usermgmt.users SET jwt_token = $1 where email = $2`, tokenString, lguser.Usermail); err != nil {
+			c.JSON(http.StatusLoopDetected, gin.H{"error" : "Unable to store the token"})
+			return
+		}
+
 		if err := Greeting(lguser.Usermail, "./templates/greeting.html"); err != nil {
 			fmt.Printf("Failed to send greeting email: %v\n", err)
 		}
 
+		
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Login Successfully",
 			"token": tokenString,
