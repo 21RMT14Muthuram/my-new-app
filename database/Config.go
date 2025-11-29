@@ -49,10 +49,10 @@ func InitDB() error {
 					config.SSLMode,
 				)
 	}
-
+	fmt.Print("value of env files", connStr)
 	log.Printf("Connecting to database: %s@%s:%s/%s", 
 		config.User, config.Host, config.Port, config.Database)
-	fmt.Print("--------",connStr)
+		
 	poolConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
 		return fmt.Errorf("\n error parsing connection string: %w", err)
@@ -64,7 +64,6 @@ func InitDB() error {
 	poolConfig.MaxConnLifetime = time.Hour
 	poolConfig.MaxConnIdleTime = 30 * time.Minute
 
-	// Create connection pool
 	DB, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {
 		return fmt.Errorf("\n error creating connection pool: %w", err)
