@@ -19,7 +19,7 @@ type User struct {
 }
 
 type Claims struct {
-	Usermail strmain.go main.gog `json:"usermail"`
+	Usermail string `json:"usermail"`
 	jwt.RegisteredClaims
 }
 
