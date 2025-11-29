@@ -19,8 +19,15 @@ type User struct {
 }
 
 type Claims struct {
-	Usermail string `json:"usermail"`
+	Usermail strmain.go main.gog `json:"usermail"`
 	jwt.RegisteredClaims
 }
 
 var JWTKey = []byte("my_secret_key")
+
+
+type OrganizationType struct{
+    ID          int         `json:"id"`
+    OrgCode     string      `json:"orgcode"`
+    OrgName     string      `json:"orgname"`
+}

@@ -54,6 +54,7 @@ func main() {
 	auth.Use(middleware.AuthMiddleware())
 		
 	auth.GET("/content", controller.Content)
+	auth.POST("/admin-side/:id", controller.CreateOrganization)
 
 	fmt.Println("Server starting on :9000")
 	
