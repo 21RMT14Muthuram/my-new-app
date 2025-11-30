@@ -55,6 +55,7 @@ func main() {
 		
 	auth.GET("/content", controller.Content)
 	auth.POST("/admin-side/:id", controller.CreateOrganization)
+	auth.POST("/join-org/:id", controller.UserJoin)
 
 	fmt.Println("Server starting on :9000")
 	
